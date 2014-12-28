@@ -2,7 +2,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 let s:unite_source = {
-      \ 'name': 'colorscheme',
+      \ 'name': 'manpage',
       \ 'hooks': {},
       \ 'action_table': {'*': {}},
       \ }
@@ -15,11 +15,11 @@ function! s:unite_source.hooks.on_close(args, context)
   if s:beforecolor == g:colors_name
     return
   endif
-  execute s:colorscheme(s:beforecolor)
+  execute s:manpage(s:beforecolor)
 endfunction
 
 let s:unite_source.action_table['*'].preview = {
-      \ 'description' : 'preview this colorscheme',
+      \ 'description' : 'preview this manpage',
       \ 'is_quit' : 0,
       \ }
 
@@ -27,33 +27,38 @@ function! s:unite_source.action_table['*'].preview.func(candidate)
   execute a:candidate.action__command
 endfunction
 
-function! s:colorscheme(x)
+function! s:manpage(x)
   return printf("%s %s",
-        \ get(g:, 'unite_colorscheme_command', 'colorscheme'),
+        \ get(g:, 'unite_manpage_command', 'manpage'),
         \ a:x)
 endfunction
 
 function! s:unite_source.gather_candidates(args, context)
   " [(name, path)]
   " e.g. [('adaryn', '/Users/ujihisa/.vimbundles/ColorSamplerPack/colors/adaryn.vim'), ...]
+
+  " apropos . | awk '{print $1}'
+
+  let s:manpages = system("apropos . | awk '{print $1}'")
+
   let colorlist = unite#util#sort_by(unite#util#uniq_by(
-      \ map(split(globpath(&runtimepath, 'colors/*.vim'), '\n'),
+      \ map(split(s:manpages, '\n'),
       \'[fnamemodify(v:val, ":t:r"), fnamemodify(v:val, ":p")]'), 'v:val[0]'),
       \'v:val[0]')
 
   " "action__type" is necessary to avoid being added into cmdline-history.
   return map(colorlist, '{
         \ "word": v:val[0],
-        \ "source": "colorscheme",
+        \ "source": "manpage",
         \ "kind": ["file", "command"],
-        \ "action__command": s:colorscheme(v:val[0]),
+        \ "action__command": s:manpage(v:val[0]),
         \ "action__type": ": ",
         \ "action__path": v:val[1],
         \ "action__directory": fnamemodify(v:val[1], ":h"),
         \ }')
 endfunction
 
-function! unite#sources#colorscheme#define()
+function! unite#sources#manpage#define()
   return s:unite_source
 endfunction
 
