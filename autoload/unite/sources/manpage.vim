@@ -19,7 +19,7 @@ function! s:unite_source.hooks.on_close(args, context)
 endfunction
 
 let s:unite_source.action_table['*'].preview = {
-      \ 'description' : 'preview this manpage',
+      \ 'description' : 'open this manpage',
       \ 'is_quit' : 0,
       \ }
 
@@ -37,17 +37,15 @@ function! s:unite_source.gather_candidates(args, context)
   " [(name, path)]
   " e.g. [('adaryn', '/Users/ujihisa/.vimbundles/ColorSamplerPack/colors/adaryn.vim'), ...]
 
-  " apropos . | awk '{print $1}'
+  let l:manpages = system("apropos . | awk \'{print $1}\'")
 
-  let s:manpages = system("apropos . | awk '{print $1}'")
-
-  let colorlist = unite#util#sort_by(unite#util#uniq_by(
-      \ map(split(s:manpages, '\n'),
+  let manpageslist = unite#util#sort_by(unite#util#uniq_by(
+      \ map(split(l:manpages, '\n'),
       \'[fnamemodify(v:val, ":t:r"), fnamemodify(v:val, ":p")]'), 'v:val[0]'),
       \'v:val[0]')
 
   " "action__type" is necessary to avoid being added into cmdline-history.
-  return map(colorlist, '{
+  return map(manpageslist, '{
         \ "word": v:val[0],
         \ "source": "manpage",
         \ "kind": ["file", "command"],
