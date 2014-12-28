@@ -28,9 +28,7 @@ function! s:unite_source.action_table['*'].preview.func(candidate)
 endfunction
 
 function! s:manpage(x)
-  return printf("%s %s",
-        \ get(g:, 'unite_manpage_command', 'manpage'),
-        \ a:x)
+  return printf("%s %s", "Man", a:x)
 endfunction
 
 function! s:unite_source.gather_candidates(args, context)
